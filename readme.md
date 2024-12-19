@@ -1,0 +1,8 @@
+- animation
+- hue / saturation / value - where spells are cast
+  - in front - apply light and saturation over all character when spell in front of them
+  - behind - at the edges of the character
+- shader looks interesting - maybe can be used as a replacement of hue changes
+- drag and drop - inventory
+- isometric - the game itself - background, walls
+- masking - draw a hole in the wall that is drawn in front of the character
