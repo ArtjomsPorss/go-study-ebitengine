@@ -26,11 +26,16 @@ const (
   frameWidthStand = 43
   frameHeightStand = 78
   frameCountStand = 6
+  
+  frameWidthAttack = 96
+  frameHeightAttack = 85
+  frameCountAttack = 16
 )
 
 var (
   runnerImage *ebiten.Image
   standingImage *ebiten.Image
+  attackingImage *ebiten.Image
   imageToRender *ebiten.Image
 
   tempHeight int
@@ -55,19 +60,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-  // pick image and cutout size for drawing depending on whether character is standing or running
-  if imageToRender == nil || inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-    imageToRender = standingImage
-    tempWidth = frameWidthStand
-    tempHeight = frameHeightStand
-    tempFrameCount = frameCountStand
-  } else if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-    imageToRender = runnerImage
-    tempWidth = frameWidth
-    tempHeight = frameHeight
-    tempFrameCount = frameCount
-  } 
-
+  selectImageToDraw()
   op := &ebiten.DrawImageOptions{}
   op.GeoM.Translate(-float64(tempWidth)/2, -float64(tempHeight)/2)
   op.GeoM.Translate(screenWidth/2, screenHeight/2)
@@ -82,19 +75,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
-  img, _, err := ebitenutil.NewImageFromFile("druid-run.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  runnerImage = ebiten.NewImageFromImage(img)
-
-  img2, _, err := ebitenutil.NewImageFromFile("druid-stand.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  standingImage = ebiten.NewImageFromImage(img2)
-
-
+  loadImages()
   ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
   ebiten.SetWindowTitle("Animation Demo")
   if err := ebiten.RunGame(&Game{}); err != nil {
@@ -121,3 +102,44 @@ func calculateZone(x, y int) int {
   region := int(math.Floor(angle/22.5))
   return region % 16
 }
+
+func selectImageToDraw() {
+  // pick image and cutout size for drawing depending on whether character is standing or running
+  if imageToRender == nil || inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+    imageToRender = standingImage
+    tempWidth = frameWidthStand
+    tempHeight = frameHeightStand
+    tempFrameCount = frameCountStand
+  } else if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+    imageToRender = runnerImage
+    tempWidth = frameWidth
+    tempHeight = frameHeight
+    tempFrameCount = frameCount
+  } else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+    imageToRender = attackingImage
+    tempWidth = frameWidthAttack
+    tempHeight = frameHeightAttack
+    tempFrameCount = frameCountAttack
+  }
+}
+
+func loadImages() {
+  img, _, err := ebitenutil.NewImageFromFile("druid-run.png")
+  if err != nil {
+    log.Fatal(err)
+  }
+  runnerImage = ebiten.NewImageFromImage(img)
+
+  img2, _, err := ebitenutil.NewImageFromFile("druid-stand.png")
+  if err != nil {
+    log.Fatal(err)
+  }
+  standingImage = ebiten.NewImageFromImage(img2)
+
+  img3, _, err := ebitenutil.NewImageFromFile("druid-attack.png")
+  if err != nil {
+    log.Fatal(err)
+  }
+  attackingImage = ebiten.NewImageFromImage(img3)
+}
+
