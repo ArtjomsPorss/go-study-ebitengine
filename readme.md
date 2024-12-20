@@ -1,8 +1,22 @@
 - animation
+  - [x] read image
+  - [x] remove background from druid image
+  - [x] draw running image
+  - [x] standing image
+  - [x] switch from standing to running based on mouse left click
+  - [x] attacking image
+  - [x] switch on attacking image if right mouse clicked
+  - [ ] (later) complete running and attacking animation when canceled
 - hue / saturation / value - where spells are cast
   - in front - apply light and saturation over all character when spell in front of them
   - behind - at the edges of the character
 - shader looks interesting - maybe can be used as a replacement of hue changes
 - drag and drop - inventory
 - isometric - the game itself - background, walls
+  - [ ] draw background
+  - [ ] draw walls
+  - [ ] create a level
+  - [ ] move around level when walking
+  - [ ] walls prevent from moving forward
+  - [ ] [shader/hue] walls disappear when wall in front of a character 
 - masking - draw a hole in the wall that is drawn in front of the character
