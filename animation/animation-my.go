@@ -42,6 +42,8 @@ var (
   tempWidth int
 
   tempFrameCount int
+
+  floorSheet *SpriteSheetFloor
 )
 
 type Game struct {
@@ -60,6 +62,15 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+  // draw floor
+  floorOp:= &ebiten.DrawImageOptions{}
+  // TODO Height position could be better maybe - currently it is relative to character
+  // position. Maybe character position is calculated incorrectly?
+  floorOp.GeoM.Translate(-float64(floorSheet.Width)/2, -float64(floorSheet.Height)/8)
+  floorOp.GeoM.Translate(screenWidth/2, screenHeight/2)
+  screen.DrawImage(floorSheet.Floor, floorOp)
+  
+  // draw character
   selectImageToDraw()
   op := &ebiten.DrawImageOptions{}
   op.GeoM.Translate(-float64(tempWidth)/2, -float64(tempHeight)/2)
@@ -141,5 +152,11 @@ func loadImages() {
     log.Fatal(err)
   }
   attackingImage = ebiten.NewImageFromImage(img3)
+
+  ss, err := LoadFloorSpriteSheet()
+  if err != nil {
+    log.Fatal(err)
+  }
+  floorSheet = ss
 }
 

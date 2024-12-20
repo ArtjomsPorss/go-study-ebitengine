@@ -13,7 +13,8 @@
 - shader looks interesting - maybe can be used as a replacement of hue changes
 - drag and drop - inventory
 - isometric - the game itself - background, walls
-  - [ ] draw background
+  - [.] draw background
+    - [ ] select romboid as image
   - [ ] draw walls
   - [ ] create a level
   - [ ] move around level when walking
