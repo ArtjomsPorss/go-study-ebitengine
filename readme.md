@@ -13,11 +13,12 @@
 - shader looks interesting - maybe can be used as a replacement of hue changes
 - drag and drop - inventory
 - isometric - the game itself - background, walls
-  - [.] draw background
-    - [ ] select romboid as image
-  - [ ] draw walls
-  - [ ] create a level
+  - [x] draw background
+    - [x] select romboid as image
+    - [x] draw a level of floor (outside screen also)
   - [ ] move around level when walking
+  - [ ] create a level
+  - [ ] draw walls
   - [ ] walls prevent from moving forward
   - [ ] [shader/hue] walls disappear when wall in front of a character 
 - masking - draw a hole in the wall that is drawn in front of the character

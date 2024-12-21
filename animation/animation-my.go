@@ -44,6 +44,7 @@ var (
   tempFrameCount int
 
   floorSheet *SpriteSheetFloor
+  gameLevel *GameLevel
 )
 
 type Game struct {
@@ -63,13 +64,8 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
   // draw floor
-  floorOp:= &ebiten.DrawImageOptions{}
-  // TODO Height position could be better maybe - currently it is relative to character
-  // position. Maybe character position is calculated incorrectly?
-  floorOp.GeoM.Translate(-float64(floorSheet.Width)/2, -float64(floorSheet.Height)/8)
-  floorOp.GeoM.Translate(screenWidth/2, screenHeight/2)
-  screen.DrawImage(floorSheet.Floor, floorOp)
-  
+  drawGameLevel(screen)
+ 
   // draw character
   selectImageToDraw()
   op := &ebiten.DrawImageOptions{}
@@ -87,6 +83,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
   loadImages()
+  gameLevel = CreateGameLevel()
   ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
   ebiten.SetWindowTitle("Animation Demo")
   if err := ebiten.RunGame(&Game{}); err != nil {
@@ -158,5 +155,30 @@ func loadImages() {
     log.Fatal(err)
   }
   floorSheet = ss
+}
+
+func drawGameLevel(screen *ebiten.Image) {
+  /*
+  floorOp := &ebiten.DrawImageOptions{}
+  // TODO Height position could be better maybe - currently it is relative to character
+  // position. Maybe character position is calculated incorrectly?
+  floorOp.GeoM.Translate(-float64(floorSheet.Width)/2, -float64(floorSheet.Height)/8)
+  floorOp.GeoM.Translate(screenWidth/2, screenHeight/2)
+  screen.DrawImage(floorSheet.Floor, floorOp)
+  */
+  for y := 0; y < len(gameLevel.Level); y++ {
+    for x := 0; x < len(gameLevel.Level[y]); x++ {
+      gameLevelOptions := &ebiten.DrawImageOptions{}
+      transX := float64(gameLevel.SpriteWidth * x)
+      transY := float64(gameLevel.SpriteHeight / 2 * y)
+      // since rombs must fit inbetween
+      // the even layer should be shifted to sit inbetween
+      if y % 2 == 1 {
+        transX -= float64(gameLevel.SpriteWidth/2)
+      }
+      gameLevelOptions.GeoM.Translate(transX, transY)
+      screen.DrawImage(gameLevel.Level[y][x], gameLevelOptions)
+    }
+  }
 }
 
