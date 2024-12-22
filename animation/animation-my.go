@@ -164,19 +164,11 @@ func loadImages() {
 }
 
 func drawGameLevel(screen *ebiten.Image) {
-  /*
-  floorOp := &ebiten.DrawImageOptions{}
-  // TODO Height position could be better maybe - currently it is relative to character
-  // position. Maybe character position is calculated incorrectly?
-  floorOp.GeoM.Translate(-float64(floorSheet.Width)/2, -float64(floorSheet.Height)/8)
-  floorOp.GeoM.Translate(screenWidth/2, screenHeight/2)
-  screen.DrawImage(floorSheet.Floor, floorOp)
-  */
   for y := 0; y < len(gameLevel.Level); y++ {
     for x := 0; x < len(gameLevel.Level[y]); x++ {
       gameLevelOptions := &ebiten.DrawImageOptions{}
-      transX := float64(gameLevel.SpriteWidth * x)
-      transY := float64(gameLevel.SpriteHeight / 2 * y)
+      transX := float64(gameLevel.SpriteWidth * x) - gameLevel.PlayerX
+      transY := float64(gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerY
       // since rombs must fit inbetween
       // the even layer should be shifted to sit inbetween
       if y % 2 == 1 {
@@ -200,7 +192,7 @@ func updateCharacterState() {
 
 func updateCharacterPosition() {
   if (characterState == 1) { // running - change the position
-    distance := 2.0
+    distance := 3.0
 
     modAngle := angle
     if modAngle < 0 {

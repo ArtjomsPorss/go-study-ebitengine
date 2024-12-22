@@ -16,9 +16,10 @@
   - [x] draw background
     - [x] select romboid as image
     - [x] draw a level of floor (outside screen also)
-  - [ ] move around level when walking
+  - [x] move around level when walking
+    - [ ] level shold be drawn not in zig zag but rather each lower tile is shifted right
   - [ ] create a level
   - [ ] draw walls
-  - [ ] walls prevent from moving forward
+  - [ ] walls prevent from moving forward - collision detection
   - [ ] [shader/hue] walls disappear when wall in front of a character 
 - masking - draw a hole in the wall that is drawn in front of the character
