@@ -167,13 +167,18 @@ func drawGameLevel(screen *ebiten.Image) {
   for y := 0; y < len(gameLevel.Level); y++ {
     for x := 0; x < len(gameLevel.Level[y]); x++ {
       gameLevelOptions := &ebiten.DrawImageOptions{}
-      transX := float64(gameLevel.SpriteWidth * x) - gameLevel.PlayerX
-      transY := float64(gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerY
+      // transX := float64(gameLevel.SpriteWidth * x + gameLevel.SpriteWidth / 2 * y) - gameLevel.PlayerX
+      // transY := float64(gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerY
+      // transX := float64(-gameLevel.SpriteWidth / 2 * x + gameLevel.SpriteWidth / 2 * x) - gameLevel.PlayerX
+      // transY := float64(-gameLevel.SpriteHeight / 2 * x + gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerY
+      transX := float64(gameLevel.SpriteWidth / 2 * x + gameLevel.SpriteWidth / 2 * y) - gameLevel.PlayerX
+      transY := float64(-gameLevel.SpriteHeight / 2 * x + gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerY
+      
       // since rombs must fit inbetween
       // the even layer should be shifted to sit inbetween
-      if y % 2 == 1 {
-        transX -= float64(gameLevel.SpriteWidth/2)
-      }
+      // if y % 2 == 1 {
+        // transX -= float64(gameLevel.SpriteWidth/2)
+      // }
       gameLevelOptions.GeoM.Translate(transX, transY)
       screen.DrawImage(gameLevel.Level[y][x], gameLevelOptions)
     }
