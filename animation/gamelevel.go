@@ -15,8 +15,8 @@ type GameLevel struct {
   // current character position
   // TODO probably can be moved to character struct?
   // so that each npc can also contain position on level
-  PlayerX int
-  PlayerY int
+  PlayerX float64
+  PlayerY float64
   
   SpriteWidth int
   SpriteHeight int

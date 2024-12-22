@@ -45,6 +45,9 @@ var (
 
   floorSheet *SpriteSheetFloor
   gameLevel *GameLevel
+
+  characterState int // 0 - stand, 1 - run, 2 - attack
+  angle float64
 )
 
 type Game struct {
@@ -58,7 +61,10 @@ func (g *Game) Update() error {
   g.count++
   g.mouseX, g.mouseY = ebiten.CursorPosition()
   g.zone = calculateZone(g.mouseX, g.mouseY)
-  log.Printf("X[%v] Y[%v] Zone[%v]", g.mouseX, g.mouseY, g.zone)
+  log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerX, gameLevel.PlayerY, angle)
+
+  updateCharacterState()
+  updateCharacterPosition()
   return nil
 }
 
@@ -67,7 +73,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
   drawGameLevel(screen)
  
   // draw character
-  selectImageToDraw()
+  selectImageToDraw(g)
   op := &ebiten.DrawImageOptions{}
   op.GeoM.Translate(-float64(tempWidth)/2, -float64(tempHeight)/2)
   op.GeoM.Translate(screenWidth/2, screenHeight/2)
@@ -96,34 +102,34 @@ func calculateZone(x, y int) int {
   dx := float64(x - centerX)
   dy := float64(centerY - y) // invert y axis to make upward positive
   // get angle in degrees
-  angle := math.Atan2(dy, dx) * (180 / math.Pi)
+  angle = math.Atan2(dy, dx) * (180 / math.Pi)
   // to make South area as value 0 - currently 0 is east-north
-  angle += 101.25 
+  modAngle := angle + 101.25 
   // normalize angle to 0-360
-  if angle < 0 {
-    angle += 360 
-  } else if angle > 360 {
-    angle -= 360
+  if modAngle < 0 {
+    modAngle += 360 
+  } else if modAngle > 360 {
+    modAngle -= 360
   }
-  angle = 360 - angle
+  modAngle = 360 - modAngle
   // divide circle into 16 regions (22.5 degrees each)
-  region := int(math.Floor(angle/22.5))
+  region := int(math.Floor(modAngle/22.5))
   return region % 16
 }
 
-func selectImageToDraw() {
+func selectImageToDraw(g *Game) {
   // pick image and cutout size for drawing depending on whether character is standing or running
-  if imageToRender == nil || inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+  if imageToRender == nil || characterState == 0 {
     imageToRender = standingImage
     tempWidth = frameWidthStand
     tempHeight = frameHeightStand
     tempFrameCount = frameCountStand
-  } else if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+  } else if characterState == 1 {
     imageToRender = runnerImage
     tempWidth = frameWidth
     tempHeight = frameHeight
     tempFrameCount = frameCount
-  } else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+  } else if characterState == 2 {
     imageToRender = attackingImage
     tempWidth = frameWidthAttack
     tempHeight = frameHeightAttack
@@ -182,3 +188,33 @@ func drawGameLevel(screen *ebiten.Image) {
   }
 }
 
+func updateCharacterState() {
+  if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+    characterState = 0 // player standing
+  } else if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+    characterState = 1 // player running
+  } else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+    characterState = 2 // player attacking 
+  }
+}
+
+func updateCharacterPosition() {
+  if (characterState == 1) { // running - change the position
+    distance := 2.0
+
+    modAngle := angle
+    if modAngle < 0 {
+      modAngle += 360 
+    } else if modAngle > 360 {
+      modAngle -= 360
+    }
+    modAngle = 360 - modAngle
+
+    angleRadians := modAngle * math.Pi / 180
+    deltaX := math.Cos(angleRadians) * distance
+    deltaY := math.Sin(angleRadians) * distance
+    // update current position
+    gameLevel.PlayerX += deltaX
+    gameLevel.PlayerY += deltaY
+  }
+}
