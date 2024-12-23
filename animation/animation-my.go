@@ -61,7 +61,7 @@ func (g *Game) Update() error {
   g.count++
   g.mouseX, g.mouseY = ebiten.CursorPosition()
   g.zone = calculateZone(g.mouseX, g.mouseY)
-  log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerX, gameLevel.PlayerY, angle)
+  log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v] walls[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerX, gameLevel.PlayerY, angle, len(floorSheet.WallTopBottom))
 
   updateCharacterState()
   updateCharacterPosition()
@@ -71,6 +71,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
   // draw floor
   drawGameLevel(screen)
+  drawWall(screen)
  
   // draw character
   selectImageToDraw(g)
@@ -173,6 +174,18 @@ func drawGameLevel(screen *ebiten.Image) {
       gameLevelOptions.GeoM.Translate(transX, transY)
       screen.DrawImage(gameLevel.Level[y][x], gameLevelOptions)
     }
+  }
+}
+
+func drawWall(screen *ebiten.Image) {
+
+  for x := 0; x < len(floorSheet.WallTopBottom); x++ {
+    drawOpts := &ebiten.DrawImageOptions{}
+    transX := float64(x * floorSheet.CliffWidth / 2) 
+    transY := float64(x * -floorSheet.Height / 2)
+
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY)
+    screen.DrawImage(floorSheet.WallTopBottom[x], drawOpts)
   }
 }
 
