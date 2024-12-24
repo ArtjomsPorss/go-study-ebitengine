@@ -11,8 +11,8 @@ import (
 )
 
 const (
-  screenWidth = 320
-  screenHeight = 240
+  screenWidth = 649
+  screenHeight = 480
   centerX = screenWidth / 2
   centerY = screenHeight / 2
 
@@ -178,14 +178,35 @@ func drawGameLevel(screen *ebiten.Image) {
 }
 
 func drawWall(screen *ebiten.Image) {
+  maxLen := len(floorSheet.WallTopBottom)
+  gameLevelTilesX := len(gameLevel.Level[0])
+  gameLevelTilesY := len(gameLevel.Level)
+  drawOpts := &ebiten.DrawImageOptions{}
 
-  for x := 0; x < len(floorSheet.WallTopBottom); x++ {
-    drawOpts := &ebiten.DrawImageOptions{}
+  // draw TOP walls
+  for x := 0; x < maxLen; x++ {
+    if x == gameLevelTilesX {
+      break
+    }
     transX := float64(x * floorSheet.CliffWidth / 2) 
     transY := float64(x * -floorSheet.Height / 2)
 
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY)
+    drawOpts.GeoM.Reset()
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY - floorSheet.CliffYDrawStartingPoint)
     screen.DrawImage(floorSheet.WallTopBottom[x], drawOpts)
+  }
+
+  // draw BOTTOM walls
+  for y := 0; y < maxLen; y++ {
+    if y == gameLevelTilesX {
+      break
+    }
+    transX := float64(y * floorSheet.CliffWidth / 2 + gameLevelTilesY * floorSheet.Width / 2) 
+    transY := float64(y * -floorSheet.Height / 2 + gameLevelTilesY * floorSheet.Width / 2 - 160)
+
+    drawOpts.GeoM.Reset()
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY - floorSheet.CliffYDrawStartingPoint)
+    screen.DrawImage(floorSheet.WallTopBottom[y], drawOpts)
   }
 }
 

@@ -23,6 +23,7 @@ type SpriteSheetFloor struct {
   CliffWidth int
   CliffFullHeight int
   CliffHeight int
+  CliffYDrawStartingPoint float64
   // wall - cliff - corner
   WallCorner *ebiten.Image
   CornerWidth int
@@ -44,7 +45,7 @@ func LoadFloorSpriteSheet() (*SpriteSheetFloor, error) {
   floorSheet.Floor = sheet.SubImage(image.Rect(0,0,floorSheet.Width,floorSheet.Height)).(*ebiten.Image)
   // load 
   loadTopBottomCliff(floorSheet)
-
+  loadLeftRightCliff(floorSheet)
   return floorSheet, nil
 }
 
@@ -59,10 +60,26 @@ func loadTopBottomCliff(spriteSheet *SpriteSheetFloor) {
   spriteSheet.CliffNarrowWidth = 80 // narrow width is the actual cliff
   spriteSheet.CornerHeight = 448
   spriteSheet.CliffFullHeight = 512
+  spriteSheet.CliffYDrawStartingPoint = 432.0
   // load sheet an array
   for i:=0; i < len(spriteSheet.WallTopBottom); i++ {
     spriteSheet.WallTopBottom[i] = sheet.SubImage(image.Rect(i * spriteSheet.CliffWidth,0,(i+1) * spriteSheet.CliffWidth,spriteSheet.CliffFullHeight)).(*ebiten.Image)  
   }
+}
 
+func loadCorner(spriteSheet *SpriteSheetFloor) {
+
+}
+
+func loadLeftRightCliff(spriteSheet *SpriteSheetFloor) {
+  img, _, err := ebitenutil.NewImageFromFile("cliff2.png")
+  if err != nil {
+    log.Fatal(err)
+  }
+  sheet := ebiten.NewImageFromImage(img)
+  // load sheet an array
+  for i:=0; i < len(spriteSheet.WallLeftRight); i++ {
+    spriteSheet.WallLeftRight[i] = sheet.SubImage(image.Rect(i * spriteSheet.CliffWidth,0,(i+1) * spriteSheet.CliffWidth,spriteSheet.CliffFullHeight)).(*ebiten.Image)  
+  }
 }
 
