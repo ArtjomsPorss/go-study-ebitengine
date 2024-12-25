@@ -24,6 +24,7 @@ type SpriteSheetFloor struct {
   CliffFullHeight int
   CliffHeight int
   CliffYDrawStartingPoint float64
+  CliffYRightDrawStartingPoint float64 // when drawing right walls - substract
   // wall - cliff - corner
   WallCorner *ebiten.Image
   CornerWidth int
@@ -72,6 +73,7 @@ func loadCorner(spriteSheet *SpriteSheetFloor) {
 }
 
 func loadLeftRightCliff(spriteSheet *SpriteSheetFloor) {
+  spriteSheet.CliffYRightDrawStartingPoint = 360 
   img, _, err := ebitenutil.NewImageFromFile("cliff2.png")
   if err != nil {
     log.Fatal(err)

@@ -7,7 +7,7 @@ import (
 
 type GameLevel struct {
   // for starters square level
-  Level [12][8]*ebiten.Image
+  Level [8][8]*ebiten.Image
   // starting position
   StartX int
   StartY int

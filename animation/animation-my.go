@@ -69,6 +69,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+  // TODO prevent drawing images outside current view
   // draw floor
   drawGameLevel(screen)
   drawWall(screen)
@@ -165,6 +166,7 @@ func loadImages() {
 }
 
 func drawGameLevel(screen *ebiten.Image) {
+  // TODO repeated calculations can be done only once outside loop
   for y := 0; y < len(gameLevel.Level); y++ {
     for x := 0; x < len(gameLevel.Level[y]); x++ {
       gameLevelOptions := &ebiten.DrawImageOptions{}
@@ -178,6 +180,7 @@ func drawGameLevel(screen *ebiten.Image) {
 }
 
 func drawWall(screen *ebiten.Image) {
+  // TODO repeated calculations can be done only once outside loop
   maxLen := len(floorSheet.WallTopBottom)
   gameLevelTilesX := len(gameLevel.Level[0])
   gameLevelTilesY := len(gameLevel.Level)
@@ -196,18 +199,48 @@ func drawWall(screen *ebiten.Image) {
     screen.DrawImage(floorSheet.WallTopBottom[x], drawOpts)
   }
 
+
   // draw BOTTOM walls
   for y := 0; y < maxLen; y++ {
     if y == gameLevelTilesX {
       break
     }
     transX := float64(y * floorSheet.CliffWidth / 2 + gameLevelTilesY * floorSheet.Width / 2) 
-    transY := float64(y * -floorSheet.Height / 2 + gameLevelTilesY * floorSheet.Width / 2 - 160)
+    transY := float64(y * -floorSheet.Height / 2 + gameLevelTilesY * floorSheet.Width / 2 )
 
     drawOpts.GeoM.Reset()
     drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY - floorSheet.CliffYDrawStartingPoint)
     screen.DrawImage(floorSheet.WallTopBottom[y], drawOpts)
   }
+
+  // draw LEFT wall
+  for x := 0; x < maxLen; x++ {
+     if x == gameLevelTilesY {
+      break;
+    }
+    transX := float64(x * floorSheet.CliffWidth / 2 - floorSheet.Height) 
+    transY := float64(x * floorSheet.Height / 2 + floorSheet.CliffHeight - floorSheet.Height)
+
+    drawOpts.GeoM.Reset()
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY - floorSheet.CliffYDrawStartingPoint)
+    screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
+  }
+
+  // draw RIGHT wall
+  for x := 0; x < maxLen; x++ {
+     if x == gameLevelTilesY {
+      break;
+    }
+    transX := float64(x * floorSheet.CliffWidth / 2 - floorSheet.Height + floorSheet.Width / 2 * 8) 
+    transY := float64(x * floorSheet.Height / 2 - floorSheet.Height / 2 * 8) - floorSheet.CliffYRightDrawStartingPoint 
+
+    drawOpts.GeoM.Reset()
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY )
+    screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
+  }
+
+  // draw CORNERS
+    // last wall pieces on all sides replace by walls
 }
 
 func updateCharacterState() {
