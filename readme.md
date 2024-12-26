@@ -20,6 +20,7 @@
     - [x] level shold be drawn not in zig zag but rather each lower tile is shifted right
   - [x] draw walls
   - [x] walls prevent from moving forward - collision detection
+    - [ ] smooth movement along the wall
   - [ ] [shader/hue] walls disappear when wall in front of a character 
 - masking - draw a hole in the wall that is drawn in front of the character
 - battle
