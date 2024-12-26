@@ -18,7 +18,16 @@
     - [x] draw a level of floor (outside screen also)
   - [x] move around level when walking
     - [x] level shold be drawn not in zig zag but rather each lower tile is shifted right
-  - [ ] draw walls
-  - [ ] walls prevent from moving forward - collision detection
+  - [x] draw walls
+  - [x] walls prevent from moving forward - collision detection
   - [ ] [shader/hue] walls disappear when wall in front of a character 
 - masking - draw a hole in the wall that is drawn in front of the character
+- battle
+  - [ ] draw an enemy
+  - [ ] draw several enemies
+  - [ ] enemy moves towards character
+  - [ ] update closest enemy first
+    - [ ] (later) enemy shouldn't move out of bounds
+  - [ ] when enemy is close - attack
+  - [ ] attacking animation
+  - [ ] draw life

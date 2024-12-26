@@ -38,6 +38,7 @@ var (
   attackingImage *ebiten.Image
   imageToRender *ebiten.Image
 
+  // character image width and height
   tempHeight int
   tempWidth int
 
@@ -61,10 +62,10 @@ func (g *Game) Update() error {
   g.count++
   g.mouseX, g.mouseY = ebiten.CursorPosition()
   g.zone = calculateZone(g.mouseX, g.mouseY)
-  log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v] walls[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerX, gameLevel.PlayerY, angle, len(floorSheet.WallTopBottom))
+  log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v] walls[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerXY.X, gameLevel.PlayerXY.Y, angle, len(floorSheet.WallTopBottom))
 
   updateCharacterState()
-  updateCharacterPosition()
+  updateCharacterPosition(gameLevel)
   return nil
 }
 
@@ -170,8 +171,8 @@ func drawGameLevel(screen *ebiten.Image) {
   for y := 0; y < len(gameLevel.Level); y++ {
     for x := 0; x < len(gameLevel.Level[y]); x++ {
       gameLevelOptions := &ebiten.DrawImageOptions{}
-      transX := float64(gameLevel.SpriteWidth / 2 * x + gameLevel.SpriteWidth / 2 * y) - gameLevel.PlayerX
-      transY := float64(-gameLevel.SpriteHeight / 2 * x + gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerY
+      transX := float64(gameLevel.SpriteWidth / 2 * x + gameLevel.SpriteWidth / 2 * y) - gameLevel.PlayerXY.X
+      transY := float64(-gameLevel.SpriteHeight / 2 * x + gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerXY.Y
       
       gameLevelOptions.GeoM.Translate(transX, transY)
       screen.DrawImage(gameLevel.Level[y][x], gameLevelOptions)
@@ -195,7 +196,7 @@ func drawWall(screen *ebiten.Image) {
     transY := float64(x * -floorSheet.Height / 2)
 
     drawOpts.GeoM.Reset()
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY - floorSheet.CliffYDrawStartingPoint)
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
     screen.DrawImage(floorSheet.WallTopBottom[x], drawOpts)
   }
 
@@ -209,7 +210,7 @@ func drawWall(screen *ebiten.Image) {
     transY := float64(y * -floorSheet.Height / 2 + gameLevelTilesY * floorSheet.Width / 2 )
 
     drawOpts.GeoM.Reset()
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY - floorSheet.CliffYDrawStartingPoint)
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
     screen.DrawImage(floorSheet.WallTopBottom[y], drawOpts)
   }
 
@@ -222,7 +223,7 @@ func drawWall(screen *ebiten.Image) {
     transY := float64(x * floorSheet.Height / 2 + floorSheet.CliffHeight - floorSheet.Height)
 
     drawOpts.GeoM.Reset()
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY - floorSheet.CliffYDrawStartingPoint)
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
     screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
   }
 
@@ -235,7 +236,7 @@ func drawWall(screen *ebiten.Image) {
     transY := float64(x * floorSheet.Height / 2 - floorSheet.Height / 2 * 8) - floorSheet.CliffYRightDrawStartingPoint 
 
     drawOpts.GeoM.Reset()
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerX, transY - gameLevel.PlayerY )
+    drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y)
     screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
   }
 
@@ -253,7 +254,7 @@ func updateCharacterState() {
   }
 }
 
-func updateCharacterPosition() {
+func updateCharacterPosition(gl *GameLevel) {
   if (characterState == 1) { // running - change the position
     distance := 3.0
 
@@ -268,8 +269,12 @@ func updateCharacterPosition() {
     angleRadians := modAngle * math.Pi / 180
     deltaX := math.Cos(angleRadians) * distance
     deltaY := math.Sin(angleRadians) * distance
+    p := Point{gameLevel.PlayerXY.X + deltaX, gameLevel.PlayerXY.Y + deltaY}
+
+    // if new position will be within the level
     // update current position
-    gameLevel.PlayerX += deltaX
-    gameLevel.PlayerY += deltaY
+    if (gl.IsPointInPolygon(p)) {
+      gl.PlayerXY = &p
+    }
   }
 }

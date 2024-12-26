@@ -5,9 +5,14 @@ import (
   "github.com/hajimehoshi/ebiten/v2"
 )
 
+type Point struct {
+  X, Y float64
+}
+
 type GameLevel struct {
   // for starters square level
   Level [8][8]*ebiten.Image
+  LevelCoords [4]*Point
   // starting position
   StartX int
   StartY int
@@ -15,8 +20,7 @@ type GameLevel struct {
   // current character position
   // TODO probably can be moved to character struct?
   // so that each npc can also contain position on level
-  PlayerX float64
-  PlayerY float64
+  PlayerXY *Point
   
   SpriteWidth int
   SpriteHeight int
@@ -38,6 +42,30 @@ func CreateGameLevel() (*GameLevel) {
     }
   }
 
+  lvl.LevelCoords[0] = &Point{-300,-200}
+  lvl.LevelCoords[1] = &Point{320,-510}
+  lvl.LevelCoords[2] = &Point{910,-230}
+  lvl.LevelCoords[3] = &Point{300,80}
+  lvl.PlayerXY = &Point{300,-200}
+
   return lvl
 }
 
+// IsPointInPolygon determines if a point is inside a polygon
+func (lvl GameLevel) IsPointInPolygon(point Point) bool {
+	inside := false
+	n := len(lvl.LevelCoords)
+	for i := 0; i < n; i++ {
+		// Current vertex and the next vertex in the polygon
+		current := lvl.LevelCoords[i]
+		next := lvl.LevelCoords[(i+1)%n] // Wrap around to the first point after the last point
+
+		// Check if the test point is inside the polygon edge
+		if ((current.Y > point.Y) != (next.Y > point.Y)) &&
+			(point.X < (next.X-current.X)*(point.Y-current.Y)/(next.Y-current.Y)+current.X) {
+			inside = !inside
+		}
+	}
+
+	return inside
+}
