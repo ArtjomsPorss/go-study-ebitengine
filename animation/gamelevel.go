@@ -1,7 +1,7 @@
 package main
 
 import (
-  "log"
+  // "log"
   "github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -28,12 +28,7 @@ type GameLevel struct {
   Enemies [1]*Enemy
 }
 
-func CreateGameLevel() (*GameLevel) {
-  // TODO LoadFloorSpriteSheet is being called twice
-  spriteSheet, err := LoadFloorSpriteSheet()
-  if err != nil {
-    log.Fatal(err)
-  }
+func CreateGameLevel(spriteSheet *SpriteSheet) (*GameLevel) {
   lvl := &GameLevel{}
   lvl.SpriteWidth = spriteSheet.Width
   lvl.SpriteHeight = spriteSheet.Height

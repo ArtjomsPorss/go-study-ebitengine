@@ -6,7 +6,7 @@ import (
   _ "image/png"
   "log"
   "github.com/hajimehoshi/ebiten/v2"
-  "github.com/hajimehoshi/ebiten/v2/ebitenutil"
+  // "github.com/hajimehoshi/ebiten/v2/ebitenutil"
   "github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
@@ -33,10 +33,6 @@ const (
 )
 
 var (
-  runnerImage *ebiten.Image
-  standingImage *ebiten.Image
-  attackingImage *ebiten.Image
-  imageToRender *ebiten.Image
 
   // character image width and height
   tempHeight int
@@ -63,6 +59,7 @@ type Enemy struct {
   State int // 0 - stand, 1 - run, 2 - attack, 3 - dead
   // TODO to remove died sprites after some time - diedAt int
   // direction where it looks
+  // TODO can be used also for player?
   Direction int
   Angle int
 
@@ -73,6 +70,7 @@ type Enemy struct {
   ImageToRender *ebiten.Image
 }
 
+// game engine function that updates state
 func (g *Game) Update() error {
   g.count++
   g.mouseX, g.mouseY = ebiten.CursorPosition()
@@ -84,6 +82,7 @@ func (g *Game) Update() error {
   return nil
 }
 
+// game engine function that draws everything
 func (g *Game) Draw(screen *ebiten.Image) {
   // TODO prevent drawing images outside current view
   // draw floor
@@ -92,16 +91,20 @@ func (g *Game) Draw(screen *ebiten.Image) {
  
   // draw character
   selectImageToDraw(g)
+  // draw player
+  drawPlayer(g, screen)
+  // draw cows
+  drawCows(g, screen)
+}
+
+func drawPlayer(g *Game, screen *ebiten.Image) {
   op := &ebiten.DrawImageOptions{}
   op.GeoM.Translate(-float64(tempWidth)/2, -float64(tempHeight)/2)
   op.GeoM.Translate(screenWidth/2, screenHeight/2)
   i := (g.count / 5) % tempFrameCount
   sx, sy := frame0X+i*tempWidth, frame0Y + (g.zone * tempHeight)
 
-  screen.DrawImage(imageToRender.SubImage(image.Rect(sx, sy, sx+tempWidth, sy+tempHeight)).(*ebiten.Image), op)
-
-  // draw cows
-  drawCows(g, screen)
+  screen.DrawImage(floorSheet.ImageToRender.SubImage(image.Rect(sx, sy, sx+tempWidth, sy+tempHeight)).(*ebiten.Image), op)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -110,7 +113,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
   loadImages()
-  gameLevel = CreateGameLevel()
+  gameLevel = CreateGameLevel(floorSheet)
   ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
   ebiten.SetWindowTitle("Animation Demo")
   if err := ebiten.RunGame(&Game{}); err != nil {
@@ -140,18 +143,18 @@ func calculateZone(x, y int) int {
 
 func selectImageToDraw(g *Game) {
   // pick image and cutout size for drawing depending on whether character is standing or running
-  if imageToRender == nil || characterState == 0 {
-    imageToRender = standingImage
+  if floorSheet.ImageToRender == nil || characterState == 0 {
+    floorSheet.ImageToRender = floorSheet.StandingImage
     tempWidth = frameWidthStand
     tempHeight = frameHeightStand
     tempFrameCount = frameCountStand
   } else if characterState == 1 {
-    imageToRender = runnerImage
+    floorSheet.ImageToRender = floorSheet.RunnerImage
     tempWidth = frameWidth
     tempHeight = frameHeight
     tempFrameCount = frameCount
   } else if characterState == 2 {
-    imageToRender = attackingImage
+    floorSheet.ImageToRender = floorSheet.AttackingImage
     tempWidth = frameWidthAttack
     tempHeight = frameHeightAttack
     tempFrameCount = frameCountAttack
@@ -159,29 +162,7 @@ func selectImageToDraw(g *Game) {
 }
 
 func loadImages() {
-  img, _, err := ebitenutil.NewImageFromFile("resources/druid-run.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  runnerImage = ebiten.NewImageFromImage(img)
-
-  img2, _, err := ebitenutil.NewImageFromFile("resources/druid-stand.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  standingImage = ebiten.NewImageFromImage(img2)
-
-  img3, _, err := ebitenutil.NewImageFromFile("resources/druid-attack.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  attackingImage = ebiten.NewImageFromImage(img3)
-
-  ss, err := LoadFloorSpriteSheet()
-  if err != nil {
-    log.Fatal(err)
-  }
-  floorSheet = ss
+  floorSheet = LoadSprites()
 }
 
 func drawGameLevel(screen *ebiten.Image) {

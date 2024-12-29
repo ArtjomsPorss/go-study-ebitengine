@@ -33,36 +33,62 @@ type SpriteSheet struct {
   CowSpriteWidth int
   CowSpriteHeight int
   CowStand [8][10]*ebiten.Image
+
+  // player sheets
+  RunnerImage *ebiten.Image
+  StandingImage *ebiten.Image
+  AttackingImage *ebiten.Image
+  ImageToRender *ebiten.Image
+}
+
+func LoadSprites() (*SpriteSheet) {
+  sheet := &SpriteSheet{}
+  
+  // load floor
+  sheet.loadFloorSpriteSheet()
+  // load cliff
+  sheet.loadTopBottomCliff()
+  sheet.loadLeftRightCliff()
+  // load player
+  sheet.loadPlayer()
+  // load cow - enemy
+  sheet.loadCowSheet()
+  return sheet
+}
+
+func (floorSheet *SpriteSheet) loadPlayer() {
+  img, _, err := ebitenutil.NewImageFromFile("resources/druid-run.png")
+  if err != nil {
+    log.Fatal(err)
+  }
+  floorSheet.RunnerImage = ebiten.NewImageFromImage(img)
+
+  img2, _, err := ebitenutil.NewImageFromFile("resources/druid-stand.png")
+  if err != nil {
+    log.Fatal(err)
+  }
+  floorSheet.StandingImage = ebiten.NewImageFromImage(img2)
+
+  img3, _, err := ebitenutil.NewImageFromFile("resources/druid-attack.png")
+  if err != nil {
+    log.Fatal(err)
+  }
+  floorSheet.AttackingImage = ebiten.NewImageFromImage(img3)
 }
 
 
 // Load Spritesheet loads the embedded spritesheet
-func LoadFloorSpriteSheet() (*SpriteSheet, error) {
-  img, _, err := ebitenutil.NewImageFromFile("resources/floor-swamp.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  sheet := ebiten.NewImageFromImage(img)
+func (floorSheet *SpriteSheet) loadFloorSpriteSheet() {
+  sheet := loadSpriteSheet("resources/floor-swamp.png")
 
-  floorSheet := &SpriteSheet{}
   floorSheet.Width = 160
   floorSheet.Height = 80
   // load floor image
   floorSheet.Floor = sheet.SubImage(image.Rect(0,0,floorSheet.Width,floorSheet.Height)).(*ebiten.Image)
-  // load 
-  loadTopBottomCliff(floorSheet)
-  loadLeftRightCliff(floorSheet)
-
-  floorSheet.loadCowSheet()
-  return floorSheet, nil
 }
 
-func loadTopBottomCliff(spriteSheet *SpriteSheet) {
-  img, _, err := ebitenutil.NewImageFromFile("resources/cliff1.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  sheet := ebiten.NewImageFromImage(img)
+func (spriteSheet *SpriteSheet) loadTopBottomCliff() {
+  sheet := loadSpriteSheet("resources/cliff1.png")
   spriteSheet.CliffWidth = 160
   spriteSheet.CliffHeight = 448
   spriteSheet.CliffNarrowWidth = 80 // narrow width is the actual cliff
@@ -79,13 +105,9 @@ func loadCorner(spriteSheet *SpriteSheet) {
 
 }
 
-func loadLeftRightCliff(spriteSheet *SpriteSheet) {
+func (spriteSheet *SpriteSheet) loadLeftRightCliff() {
   spriteSheet.CliffYRightDrawStartingPoint = 360 
-  img, _, err := ebitenutil.NewImageFromFile("resources/cliff2.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  sheet := ebiten.NewImageFromImage(img)
+  sheet := loadSpriteSheet("resources/cliff2.png")
   // load sheet an array
   for i:=0; i < len(spriteSheet.WallLeftRight); i++ {
     spriteSheet.WallLeftRight[i] = sheet.SubImage(image.Rect(i * spriteSheet.CliffWidth,0,(i+1) * spriteSheet.CliffWidth,spriteSheet.CliffFullHeight)).(*ebiten.Image)  
@@ -98,11 +120,7 @@ func (ss *SpriteSheet) loadCowSheet() {
   ss.CowSpriteHeight = 156
 
   // cow stand
-  img, _, err := ebitenutil.NewImageFromFile("resources/cow-stand.png")
-  if err != nil {
-    log.Fatal(err)
-  }
-  sheet := ebiten.NewImageFromImage(img)
+  sheet := loadSpriteSheet("resources/cow-stand.png")
   // log.Printf("cowsheet bounds [%v]", sheet.Bounds())
 
   // load sheet into array
@@ -110,7 +128,15 @@ func (ss *SpriteSheet) loadCowSheet() {
     for x:=0; x < len(ss.CowStand[y]); x++ {
       rect := image.Rect(x * ss.CowSpriteWidth,y * ss.CowSpriteHeight,(x + 1) * ss.CowSpriteWidth,(y + 1) * ss.CowSpriteHeight)
       ss.CowStand[y][x] = sheet.SubImage(rect).(*ebiten.Image)  
-      log.Printf("cow image bounds[%v] width[%v] height[%v]", ss.CowStand[y][x].Bounds(), ss.CowSpriteWidth, ss.CowSpriteHeight)
+      // log.Printf("cow image bounds[%v] width[%v] height[%v]", ss.CowStand[y][x].Bounds(), ss.CowSpriteWidth, ss.CowSpriteHeight)
     }
   }
+}
+
+func loadSpriteSheet(path string) *ebiten.Image {
+  img, _, err := ebitenutil.NewImageFromFile(path)
+  if err != nil {
+    log.Fatal(err)
+  }
+  return ebiten.NewImageFromImage(img)
 }
