@@ -24,9 +24,10 @@
   - [ ] [shader/hue] walls disappear when wall in front of a character 
 - masking - draw a hole in the wall that is drawn in front of the character
 - battle
-  - [ ] draw an enemy
-  - [ ] draw several enemies
+  - [x] draw an enemy
+  - [ ] enemy tracks player
   - [ ] enemy moves towards character
+  - [ ] draw several enemies
   - [ ] update closest enemy first
     - [ ] (later) enemy shouldn't move out of bounds
   - [ ] when enemy is close - attack
