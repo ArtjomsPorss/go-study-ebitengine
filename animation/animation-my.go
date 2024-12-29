@@ -44,7 +44,7 @@ var (
 
   tempFrameCount int
 
-  floorSheet *SpriteSheetFloor
+  floorSheet *SpriteSheet
   gameLevel *GameLevel
 
   characterState int // 0 - stand, 1 - run, 2 - attack
@@ -58,11 +58,26 @@ type Game struct {
   zone int
 }
 
+type Enemy struct {
+  Pos *Point
+  State int // 0 - stand, 1 - run, 2 - attack, 3 - dead
+  // TODO to remove died sprites after some time - diedAt int
+  // direction where it looks
+  Direction int
+  Angle int
+
+  RunImage *ebiten.Image
+  StandImage [][]*ebiten.Image
+  AttackImage *ebiten.Image
+  DeadImage *ebiten.Image
+  ImageToRender *ebiten.Image
+}
+
 func (g *Game) Update() error {
   g.count++
   g.mouseX, g.mouseY = ebiten.CursorPosition()
   g.zone = calculateZone(g.mouseX, g.mouseY)
-  log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v] walls[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerXY.X, gameLevel.PlayerXY.Y, angle, len(floorSheet.WallTopBottom))
+  // log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v] walls[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerXY.X, gameLevel.PlayerXY.Y, angle, len(floorSheet.WallTopBottom))
 
   updateCharacterState()
   updateCharacterPosition(gameLevel)
@@ -84,6 +99,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
   sx, sy := frame0X+i*tempWidth, frame0Y + (g.zone * tempHeight)
 
   screen.DrawImage(imageToRender.SubImage(image.Rect(sx, sy, sx+tempWidth, sy+tempHeight)).(*ebiten.Image), op)
+
+  // draw cows
+  drawCows(g, screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -141,19 +159,19 @@ func selectImageToDraw(g *Game) {
 }
 
 func loadImages() {
-  img, _, err := ebitenutil.NewImageFromFile("druid-run.png")
+  img, _, err := ebitenutil.NewImageFromFile("resources/druid-run.png")
   if err != nil {
     log.Fatal(err)
   }
   runnerImage = ebiten.NewImageFromImage(img)
 
-  img2, _, err := ebitenutil.NewImageFromFile("druid-stand.png")
+  img2, _, err := ebitenutil.NewImageFromFile("resources/druid-stand.png")
   if err != nil {
     log.Fatal(err)
   }
   standingImage = ebiten.NewImageFromImage(img2)
 
-  img3, _, err := ebitenutil.NewImageFromFile("druid-attack.png")
+  img3, _, err := ebitenutil.NewImageFromFile("resources/druid-attack.png")
   if err != nil {
     log.Fatal(err)
   }
@@ -240,8 +258,22 @@ func drawWall(screen *ebiten.Image) {
     screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
   }
 
-  // draw CORNERS
+  // TODO draw CORNERS
     // last wall pieces on all sides replace by walls
+  
+  // TODO skip drawing sprites outside user window - or it is done automatically?
+}
+
+func drawCows(g *Game, screen *ebiten.Image) {
+  // selectImageToDraw(g)
+  op := &ebiten.DrawImageOptions{}
+  op.GeoM.Translate(200, 200)
+
+  divider := len(floorSheet.CowStand[0])
+  // divide by 5 makes it slow enough
+  i := g.count / 5 % divider
+  // log.Printf("i[%v]", i)
+  screen.DrawImage(floorSheet.CowStand[0][i], op)
 }
 
 func updateCharacterState() {

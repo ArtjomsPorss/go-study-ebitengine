@@ -10,7 +10,7 @@ import (
 )
 
 // spritesheet represents a collection of sprite images.
-type SpriteSheetFloor struct {
+type SpriteSheet struct {
   // floor 
   Floor *ebiten.Image
   Width int
@@ -29,17 +29,22 @@ type SpriteSheetFloor struct {
   WallCorner *ebiten.Image
   CornerWidth int
   CornerHeight int
+  
+  CowSpriteWidth int
+  CowSpriteHeight int
+  CowStand [8][10]*ebiten.Image
 }
 
+
 // Load Spritesheet loads the embedded spritesheet
-func LoadFloorSpriteSheet() (*SpriteSheetFloor, error) {
-  img, _, err := ebitenutil.NewImageFromFile("floor-swamp.png")
+func LoadFloorSpriteSheet() (*SpriteSheet, error) {
+  img, _, err := ebitenutil.NewImageFromFile("resources/floor-swamp.png")
   if err != nil {
     log.Fatal(err)
   }
   sheet := ebiten.NewImageFromImage(img)
 
-  floorSheet := &SpriteSheetFloor{}
+  floorSheet := &SpriteSheet{}
   floorSheet.Width = 160
   floorSheet.Height = 80
   // load floor image
@@ -47,11 +52,13 @@ func LoadFloorSpriteSheet() (*SpriteSheetFloor, error) {
   // load 
   loadTopBottomCliff(floorSheet)
   loadLeftRightCliff(floorSheet)
+
+  floorSheet.loadCowSheet()
   return floorSheet, nil
 }
 
-func loadTopBottomCliff(spriteSheet *SpriteSheetFloor) {
-  img, _, err := ebitenutil.NewImageFromFile("cliff1.png")
+func loadTopBottomCliff(spriteSheet *SpriteSheet) {
+  img, _, err := ebitenutil.NewImageFromFile("resources/cliff1.png")
   if err != nil {
     log.Fatal(err)
   }
@@ -68,13 +75,13 @@ func loadTopBottomCliff(spriteSheet *SpriteSheetFloor) {
   }
 }
 
-func loadCorner(spriteSheet *SpriteSheetFloor) {
+func loadCorner(spriteSheet *SpriteSheet) {
 
 }
 
-func loadLeftRightCliff(spriteSheet *SpriteSheetFloor) {
+func loadLeftRightCliff(spriteSheet *SpriteSheet) {
   spriteSheet.CliffYRightDrawStartingPoint = 360 
-  img, _, err := ebitenutil.NewImageFromFile("cliff2.png")
+  img, _, err := ebitenutil.NewImageFromFile("resources/cliff2.png")
   if err != nil {
     log.Fatal(err)
   }
@@ -82,6 +89,28 @@ func loadLeftRightCliff(spriteSheet *SpriteSheetFloor) {
   // load sheet an array
   for i:=0; i < len(spriteSheet.WallLeftRight); i++ {
     spriteSheet.WallLeftRight[i] = sheet.SubImage(image.Rect(i * spriteSheet.CliffWidth,0,(i+1) * spriteSheet.CliffWidth,spriteSheet.CliffFullHeight)).(*ebiten.Image)  
+    // log.Printf("cliff image bounds[%v]", spriteSheet.WallLeftRight[i].Bounds())
   }
 }
 
+func (ss *SpriteSheet) loadCowSheet() {
+  ss.CowSpriteWidth = 164
+  ss.CowSpriteHeight = 156
+
+  // cow stand
+  img, _, err := ebitenutil.NewImageFromFile("resources/cow-stand.png")
+  if err != nil {
+    log.Fatal(err)
+  }
+  sheet := ebiten.NewImageFromImage(img)
+  // log.Printf("cowsheet bounds [%v]", sheet.Bounds())
+
+  // load sheet into array
+  for y:=0; y < len(ss.CowStand); y++ {
+    for x:=0; x < len(ss.CowStand[y]); x++ {
+      rect := image.Rect(x * ss.CowSpriteWidth,y * ss.CowSpriteHeight,(x + 1) * ss.CowSpriteWidth,(y + 1) * ss.CowSpriteHeight)
+      ss.CowStand[y][x] = sheet.SubImage(rect).(*ebiten.Image)  
+      log.Printf("cow image bounds[%v] width[%v] height[%v]", ss.CowStand[y][x].Bounds(), ss.CowSpriteWidth, ss.CowSpriteHeight)
+    }
+  }
+}

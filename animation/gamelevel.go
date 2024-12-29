@@ -24,9 +24,12 @@ type GameLevel struct {
   
   SpriteWidth int
   SpriteHeight int
+  
+  Enemies [1]*Enemy
 }
 
 func CreateGameLevel() (*GameLevel) {
+  // TODO LoadFloorSpriteSheet is being called twice
   spriteSheet, err := LoadFloorSpriteSheet()
   if err != nil {
     log.Fatal(err)
@@ -47,6 +50,9 @@ func CreateGameLevel() (*GameLevel) {
   lvl.LevelCoords[2] = &Point{910,-230}
   lvl.LevelCoords[3] = &Point{300,80}
   lvl.PlayerXY = &Point{300,-200}
+
+  lvl.Enemies[0] = &Enemy{}
+  lvl.Enemies[0].Pos = &Point{200,200}
 
   return lvl
 }
