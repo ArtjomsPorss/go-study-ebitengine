@@ -99,9 +99,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func drawPlayer(g *Game, screen *ebiten.Image) {
   op := &ebiten.DrawImageOptions{}
-  op.GeoM.Translate(-float64(tempWidth)/2, -float64(tempHeight)/2)
+  // adjust for half character width and height
+  op.GeoM.Translate(-float64(tempWidth / 2), -float64(tempHeight / 2))
+  // adjust to draw at the center of the screen
   op.GeoM.Translate(screenWidth/2, screenHeight/2)
+  // select image based on ingame timer and frame
   i := (g.count / 5) % tempFrameCount
+  // and direction of where the cursor is pointing from player
   sx, sy := frame0X+i*tempWidth, frame0Y + (g.zone * tempHeight)
 
   screen.DrawImage(floorSheet.ImageToRender.SubImage(image.Rect(sx, sy, sx+tempWidth, sy+tempHeight)).(*ebiten.Image), op)
@@ -174,6 +178,7 @@ func drawGameLevel(screen *ebiten.Image) {
       transY := float64(-gameLevel.SpriteHeight / 2 * x + gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerXY.Y
       
       gameLevelOptions.GeoM.Translate(transX, transY)
+      gameLevelOptions.GeoM.Translate(screenWidth/2, screenHeight/2)
       screen.DrawImage(gameLevel.Level[y][x], gameLevelOptions)
     }
   }
@@ -196,6 +201,7 @@ func drawWall(screen *ebiten.Image) {
 
     drawOpts.GeoM.Reset()
     drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
+    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
     screen.DrawImage(floorSheet.WallTopBottom[x], drawOpts)
   }
 
@@ -210,6 +216,7 @@ func drawWall(screen *ebiten.Image) {
 
     drawOpts.GeoM.Reset()
     drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
+    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
     screen.DrawImage(floorSheet.WallTopBottom[y], drawOpts)
   }
 
@@ -223,6 +230,7 @@ func drawWall(screen *ebiten.Image) {
 
     drawOpts.GeoM.Reset()
     drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
+    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
     screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
   }
 
@@ -236,6 +244,7 @@ func drawWall(screen *ebiten.Image) {
 
     drawOpts.GeoM.Reset()
     drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y)
+    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
     screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
   }
 
@@ -246,15 +255,51 @@ func drawWall(screen *ebiten.Image) {
 }
 
 func drawCows(g *Game, screen *ebiten.Image) {
-  // selectImageToDraw(g)
-  op := &ebiten.DrawImageOptions{}
-  op.GeoM.Translate(200, 200)
+  selectCowImageToDraw(g)
 
   divider := len(floorSheet.CowStand[0])
   // divide by 5 makes it slow enough
   i := g.count / 5 % divider
   // log.Printf("i[%v]", i)
+
+  op := &ebiten.DrawImageOptions{}
+  // adjust for player XY
+  op.GeoM.Translate(gameLevel.Enemies[0].Pos.X - gameLevel.PlayerXY.X, gameLevel.Enemies[0].Pos.Y - gameLevel.PlayerXY.Y)
+  // adjust for where player is rendered on center of screen
+  op.GeoM.Translate(screenWidth/2, screenHeight/2)
+  // adjust for where cow's standing center mass at bottom of legs are on a sprite
+  xy := floorSheet.CowStand[0][i].Bounds().Size()
+  op.GeoM.Translate(-float64(xy.X/2), -float64(floorSheet.CowYPos))
+  // adjust for player feet position (39p lower)
+  op.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
+
   screen.DrawImage(floorSheet.CowStand[0][i], op)
+}
+
+func selectCowImageToDraw(g *Game) {
+  // find where the player is
+  // and angle to it
+  // get the area group
+  // set the proper image for rendering
+  ex := gameLevel.Enemies[0].Pos.X
+  ey := gameLevel.Enemies[0].Pos.Y
+  px := gameLevel.PlayerXY.X 
+  py := gameLevel.PlayerXY.Y 
+
+	// Calculate deltas
+	dx := float64(gameLevel.PlayerXY.X - gameLevel.Enemies[0].Pos.X)
+	dy := float64(gameLevel.Enemies[0].Pos.Y - gameLevel.PlayerXY.Y) // Invert Y-axis to make upward positive
+
+	// Get the angle in degrees
+	angle := math.Atan2(dy, dx) * (180 / math.Pi)
+	if angle < 0 {
+		angle += 360 // Normalize angle to 0-360
+	}
+
+	// Divide the circle into 8 regions (45 degrees each)
+	region := int(math.Floor((angle + 22.5) / 45)) % 8
+	log.Printf("cow xy[%v,%v] pl xy[%v,%v] region[%v]", ex,ey, px, py, region)
+	// return directions[region]
 }
 
 func updateCharacterState() {
@@ -286,8 +331,9 @@ func updateCharacterPosition(gl *GameLevel) {
 
     // if new position will be within the level
     // update current position
-    if (gl.IsPointInPolygon(p)) {
+    // TODO uncomment border
+    // if (gl.IsPointInPolygon(p)) {
       gl.PlayerXY = &p
-    }
+    // }
   }
 }

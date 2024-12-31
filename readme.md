@@ -25,6 +25,8 @@
 - masking - draw a hole in the wall that is drawn in front of the character
 - battle
   - [x] draw an enemy
+  - [x] make XY position center bottom of character
+    - [ ] adjust other sprites for player's position
   - [ ] enemy tracks player
   - [ ] enemy moves towards character
   - [ ] draw several enemies

@@ -44,10 +44,10 @@ func CreateGameLevel(spriteSheet *SpriteSheet) (*GameLevel) {
   lvl.LevelCoords[1] = &Point{320,-510}
   lvl.LevelCoords[2] = &Point{910,-230}
   lvl.LevelCoords[3] = &Point{300,80}
-  lvl.PlayerXY = &Point{300,-200}
+  lvl.PlayerXY = &Point{400,0}
 
   lvl.Enemies[0] = &Enemy{}
-  lvl.Enemies[0].Pos = &Point{200,200}
+  lvl.Enemies[0].Pos = &Point{400,0}
 
   return lvl
 }

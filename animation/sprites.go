@@ -32,11 +32,13 @@ type SpriteSheet struct {
   
   CowSpriteWidth int
   CowSpriteHeight int
+  CowYPos int // center bottom of cow's sprite height
   CowStand [8][10]*ebiten.Image
 
   // player sheets
   RunnerImage *ebiten.Image
   StandingImage *ebiten.Image
+  PlayerYPos int // used to identify center bottom of sprite when drawing
   AttackingImage *ebiten.Image
   ImageToRender *ebiten.Image
 }
@@ -57,6 +59,7 @@ func LoadSprites() (*SpriteSheet) {
 }
 
 func (floorSheet *SpriteSheet) loadPlayer() {
+  floorSheet.PlayerYPos = 39 // to adjust other sprites for the position of the player
   img, _, err := ebitenutil.NewImageFromFile("resources/druid-run.png")
   if err != nil {
     log.Fatal(err)
@@ -116,6 +119,7 @@ func (spriteSheet *SpriteSheet) loadLeftRightCliff() {
 }
 
 func (ss *SpriteSheet) loadCowSheet() {
+  ss.CowYPos = 150 // to adjust position to cow's feet where it stands
   ss.CowSpriteWidth = 164
   ss.CowSpriteHeight = 156
 
