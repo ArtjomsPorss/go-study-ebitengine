@@ -174,11 +174,19 @@ func drawGameLevel(screen *ebiten.Image) {
   for y := 0; y < len(gameLevel.Level); y++ {
     for x := 0; x < len(gameLevel.Level[y]); x++ {
       gameLevelOptions := &ebiten.DrawImageOptions{}
-      transX := float64(gameLevel.SpriteWidth / 2 * x + gameLevel.SpriteWidth / 2 * y) - gameLevel.PlayerXY.X
-      transY := float64(-gameLevel.SpriteHeight / 2 * x + gameLevel.SpriteHeight / 2 * y) - gameLevel.PlayerXY.Y
-      
+
+      // adjust for isometric positioning column/row
+      transX := float64(gameLevel.SpriteWidth / 2 * x + gameLevel.SpriteWidth / 2 * y) 
+      transY := float64(-gameLevel.SpriteHeight / 2 * x + gameLevel.SpriteHeight / 2 * y) 
       gameLevelOptions.GeoM.Translate(transX, transY)
+      // adjust for player position
+      gameLevelOptions.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
+      // adjust for player screen positioning
       gameLevelOptions.GeoM.Translate(screenWidth/2, screenHeight/2)
+      // adjust for player feet position (39p lower)
+      gameLevelOptions.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
+      // ?? adjust for character width ??
+
       screen.DrawImage(gameLevel.Level[y][x], gameLevelOptions)
     }
   }
@@ -196,12 +204,18 @@ func drawWall(screen *ebiten.Image) {
     if x == gameLevelTilesX {
       break
     }
+    drawOpts.GeoM.Reset()
+
     transX := float64(x * floorSheet.CliffWidth / 2) 
     transY := float64(x * -floorSheet.Height / 2)
-
-    drawOpts.GeoM.Reset()
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
+    drawOpts.GeoM.Translate(transX, transY - floorSheet.CliffYDrawStartingPoint)
+    // adjust for player position
+    drawOpts.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
+    // adjust for player screen positioning
     drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
+    // adjust for player feet position (39p lower)
+    drawOpts.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
+ 
     screen.DrawImage(floorSheet.WallTopBottom[x], drawOpts)
   }
 
@@ -211,12 +225,21 @@ func drawWall(screen *ebiten.Image) {
     if y == gameLevelTilesX {
       break
     }
+    drawOpts.GeoM.Reset()
+    
+    // adjust for player position
+    drawOpts.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
+    // adjust for player screen positioning
+    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
+    // adjust for player feet position (39p lower)
+    drawOpts.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
+ 
+    // adjust for tile position
     transX := float64(y * floorSheet.CliffWidth / 2 + gameLevelTilesY * floorSheet.Width / 2) 
     transY := float64(y * -floorSheet.Height / 2 + gameLevelTilesY * floorSheet.Width / 2 )
 
-    drawOpts.GeoM.Reset()
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
-    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
+    drawOpts.GeoM.Translate(transX, transY - floorSheet.CliffYDrawStartingPoint)
+
     screen.DrawImage(floorSheet.WallTopBottom[y], drawOpts)
   }
 
@@ -225,12 +248,20 @@ func drawWall(screen *ebiten.Image) {
      if x == gameLevelTilesY {
       break;
     }
+    drawOpts.GeoM.Reset()
+    
+    // adjust for player position
+    drawOpts.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
+    // adjust for player screen positioning
+    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
+    // adjust for player feet position (39p lower)
+    drawOpts.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
+
+    // adjust for tile size and positioning
     transX := float64(x * floorSheet.CliffWidth / 2 - floorSheet.Height) 
     transY := float64(x * floorSheet.Height / 2 + floorSheet.CliffHeight - floorSheet.Height)
+    drawOpts.GeoM.Translate(transX, transY - floorSheet.CliffYDrawStartingPoint)
 
-    drawOpts.GeoM.Reset()
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y - floorSheet.CliffYDrawStartingPoint)
-    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
     screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
   }
 
@@ -239,12 +270,20 @@ func drawWall(screen *ebiten.Image) {
      if x == gameLevelTilesY {
       break;
     }
+    drawOpts.GeoM.Reset()
+    
+    // adjust for player position
+    drawOpts.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
+    // adjust for player screen positioning
+    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
+    // adjust for player feet position (39p lower)
+    drawOpts.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
+
+    // adjust for tile size and positioning
     transX := float64(x * floorSheet.CliffWidth / 2 - floorSheet.Height + floorSheet.Width / 2 * 8) 
     transY := float64(x * floorSheet.Height / 2 - floorSheet.Height / 2 * 8) - floorSheet.CliffYRightDrawStartingPoint 
+    drawOpts.GeoM.Translate(transX, transY)
 
-    drawOpts.GeoM.Reset()
-    drawOpts.GeoM.Translate(transX - gameLevel.PlayerXY.X, transY - gameLevel.PlayerXY.Y)
-    drawOpts.GeoM.Translate(screenWidth/2, screenHeight/2)
     screen.DrawImage(floorSheet.WallLeftRight[x], drawOpts)
   }
 
@@ -332,8 +371,8 @@ func updateCharacterPosition(gl *GameLevel) {
     // if new position will be within the level
     // update current position
     // TODO uncomment border
-    // if (gl.IsPointInPolygon(p)) {
+    if (gl.IsPointInPolygon(p)) {
       gl.PlayerXY = &p
-    // }
+    }
   }
 }
