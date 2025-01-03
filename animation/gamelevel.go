@@ -39,13 +39,8 @@ func CreateGameLevel(spriteSheet *SpriteSheet) (*GameLevel) {
       lvl.Level[y][x] = spriteSheet.Floor
     }
   }
-/*
-  lvl.LevelCoords[0] = &Point{-300,-200}
-  lvl.LevelCoords[1] = &Point{320,-510}
-  lvl.LevelCoords[2] = &Point{910,-230}
-  lvl.LevelCoords[3] = &Point{300,80}
-*/ 
-// testing coordinates small romboid
+
+  // testing coordinates small romboid
   /*
   lvl.LevelCoords[0] = &Point{380,0}
   lvl.LevelCoords[1] = &Point{460,-80}

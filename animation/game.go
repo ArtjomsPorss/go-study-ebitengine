@@ -33,7 +33,6 @@ const (
 )
 
 var (
-
   // character image width and height
   tempHeight int
   tempWidth int
@@ -74,9 +73,12 @@ type Enemy struct {
 func (g *Game) Update() error {
   g.count++
   g.mouseX, g.mouseY = ebiten.CursorPosition()
-  g.zone = calculateZone(g.mouseX, g.mouseY)
-  // log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v] walls[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerXY.X, gameLevel.PlayerXY.Y, angle, len(floorSheet.WallTopBottom))
+ // log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v] walls[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerXY.X, gameLevel.PlayerXY.Y, angle, len(floorSheet.WallTopBottom))
+  playerFeetY := centerY + floorSheet.PlayerYPos
+  g.zone = calculateZone(centerX, playerFeetY, g.mouseX, g.mouseY, 16)
+  // log.Printf("X[%v] Y[%v] Zone[%v] Px[%v] Py[%v] angle[%v]", g.mouseX, g.mouseY, g.zone, gameLevel.PlayerXY.X, gameLevel.PlayerXY.Y + float64(playerFeetY), angle)
 
+ 
   updateCharacterState()
   updateCharacterPosition(gameLevel)
   return nil
@@ -98,6 +100,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func drawPlayer(g *Game, screen *ebiten.Image) {
+
   op := &ebiten.DrawImageOptions{}
   // adjust for half character width and height
   op.GeoM.Translate(-float64(tempWidth / 2), -float64(tempHeight / 2))
@@ -125,14 +128,14 @@ func main() {
   }
 }
 
-func calculateZone(x, y int) int {
+func calculateZone(fx, fy, tx, ty, zoneCount int) int {
   // calculate deltas from center
-  dx := float64(x - centerX)
-  dy := float64(centerY - y) // invert y axis to make upward positive
+  dx := float64(tx - fx)
+  dy := float64(fy - ty) // invert y axis to make upward positive
   // get angle in degrees
   angle = math.Atan2(dy, dx) * (180 / math.Pi)
   // to make South area as value 0 - currently 0 is east-north
-  modAngle := angle + 101.25 
+  modAngle := angle + 75
   // normalize angle to 0-360
   if modAngle < 0 {
     modAngle += 360 
@@ -141,8 +144,9 @@ func calculateZone(x, y int) int {
   }
   modAngle = 360 - modAngle
   // divide circle into 16 regions (22.5 degrees each)
-  region := int(math.Floor(modAngle/22.5))
-  return region % 16
+  regions := float64(360 / zoneCount)
+  region := int(math.Floor(modAngle/regions))
+  return region % zoneCount
 }
 
 func selectImageToDraw(g *Game) {
@@ -304,12 +308,13 @@ func drawWall(screen *ebiten.Image) {
 }
 
 func drawCows(g *Game, screen *ebiten.Image) {
-  selectCowImageToDraw(g)
+  zone := selectCowImageToDraw(g)
 
-  divider := len(floorSheet.CowStand[0])
+  log.Printf("zone[%v]", zone)
+
+  divider := len(floorSheet.CowStand[zone])
   // divide by 5 makes it slow enough
   i := g.count / 5 % divider
-  // log.Printf("i[%v]", i)
 
   op := &ebiten.DrawImageOptions{}
   // adjust for player XY
@@ -322,19 +327,27 @@ func drawCows(g *Game, screen *ebiten.Image) {
   // adjust for player feet position (39p lower)
   op.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
 
-  screen.DrawImage(floorSheet.CowStand[0][i], op)
+  screen.DrawImage(floorSheet.CowStand[zone][i], op)
 }
 
-func selectCowImageToDraw(g *Game) {
-  // find where the player is
-  // and angle to it
-  // get the area group
-  // set the proper image for rendering
+func selectCowImageToDraw(g *Game) int {
   ex := gameLevel.Enemies[0].Pos.X
   ey := gameLevel.Enemies[0].Pos.Y
-  px := gameLevel.PlayerXY.X 
-  py := gameLevel.PlayerXY.Y 
+  // playerFeetY := centerY + floorSheet.PlayerYPos
+  // px := centerX
+  // py := playerFeetY
+  px := gameLevel.PlayerXY.X
+  py := gameLevel.PlayerXY.Y
 
+  // find where the player is
+  // find angle towards player and which zone it is
+  zone := calculateZone(int(ex), int(ey), int(px), int(py), 8)
+
+	log.Printf("cow xy[%v,%v] pl xy[%v,%v] zone[%v]", ex,ey, px, py, zone)
+  // get the area group
+  // set the proper image for rendering
+ 
+  /*
 	// Calculate deltas
 	dx := float64(gameLevel.PlayerXY.X - gameLevel.Enemies[0].Pos.X)
 	dy := float64(gameLevel.Enemies[0].Pos.Y - gameLevel.PlayerXY.Y) // Invert Y-axis to make upward positive
@@ -347,8 +360,10 @@ func selectCowImageToDraw(g *Game) {
 
 	// Divide the circle into 8 regions (45 degrees each)
 	region := int(math.Floor((angle + 22.5) / 45)) % 8
-	log.Printf("cow xy[%v,%v] pl xy[%v,%v] region[%v]", ex,ey, px, py, region)
+	log.Printf("cow xy[%v,%v] pl xy[%v,%v] region[%v] zone[%v]", ex,ey, px, py, region, zone)
+	*/
 	// return directions[region]
+	return zone
 }
 
 func updateCharacterState() {

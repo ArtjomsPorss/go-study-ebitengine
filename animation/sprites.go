@@ -38,7 +38,7 @@ type SpriteSheet struct {
   // player sheets
   RunnerImage *ebiten.Image
   StandingImage *ebiten.Image
-  PlayerYPos int // used to identify center bottom of sprite when drawing
+  PlayerYPos int // used to identify center bottom of player's sprite when drawing
   AttackingImage *ebiten.Image
   ImageToRender *ebiten.Image
 }
