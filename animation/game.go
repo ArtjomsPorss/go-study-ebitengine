@@ -179,6 +179,8 @@ func drawGameLevel(screen *ebiten.Image) {
       transX := float64(gameLevel.SpriteWidth / 2 * x + gameLevel.SpriteWidth / 2 * y) 
       transY := float64(-gameLevel.SpriteHeight / 2 * x + gameLevel.SpriteHeight / 2 * y) 
       gameLevelOptions.GeoM.Translate(transX, transY)
+      // adjust for half of floor tile height
+      gameLevelOptions.GeoM.Translate(0, -float64(gameLevel.SpriteHeight / 2))
       // adjust for player position
       gameLevelOptions.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
       // adjust for player screen positioning
@@ -209,6 +211,8 @@ func drawWall(screen *ebiten.Image) {
     transX := float64(x * floorSheet.CliffWidth / 2) 
     transY := float64(x * -floorSheet.Height / 2)
     drawOpts.GeoM.Translate(transX, transY - floorSheet.CliffYDrawStartingPoint)
+    // adjust for half of floor tile height
+    drawOpts.GeoM.Translate(0, -float64(gameLevel.SpriteHeight / 2))
     // adjust for player position
     drawOpts.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
     // adjust for player screen positioning
@@ -226,7 +230,9 @@ func drawWall(screen *ebiten.Image) {
       break
     }
     drawOpts.GeoM.Reset()
-    
+  
+    // adjust for half of floor tile height
+    drawOpts.GeoM.Translate(0, -float64(gameLevel.SpriteHeight / 2))
     // adjust for player position
     drawOpts.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
     // adjust for player screen positioning
@@ -249,7 +255,9 @@ func drawWall(screen *ebiten.Image) {
       break;
     }
     drawOpts.GeoM.Reset()
-    
+ 
+     // adjust for half of floor tile height
+    drawOpts.GeoM.Translate(0, -float64(gameLevel.SpriteHeight / 2))
     // adjust for player position
     drawOpts.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
     // adjust for player screen positioning
@@ -271,7 +279,9 @@ func drawWall(screen *ebiten.Image) {
       break;
     }
     drawOpts.GeoM.Reset()
-    
+
+     // adjust for half of floor tile height
+    drawOpts.GeoM.Translate(0, -float64(gameLevel.SpriteHeight / 2))
     // adjust for player position
     drawOpts.GeoM.Translate(float64(-gameLevel.PlayerXY.X),float64(-gameLevel.PlayerXY.Y))
     // adjust for player screen positioning

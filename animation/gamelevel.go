@@ -45,11 +45,19 @@ func CreateGameLevel(spriteSheet *SpriteSheet) (*GameLevel) {
   lvl.LevelCoords[2] = &Point{910,-230}
   lvl.LevelCoords[3] = &Point{300,80}
 */ 
-// testing coordinates
+// testing coordinates small romboid
+  /*
   lvl.LevelCoords[0] = &Point{380,0}
   lvl.LevelCoords[1] = &Point{460,-80}
   lvl.LevelCoords[2] = &Point{540,0}
   lvl.LevelCoords[3] = &Point{460,80}
+  */
+
+  lvl.LevelCoords[0] = &Point{0,40}
+  lvl.LevelCoords[1] = &Point{600,-280}
+  lvl.LevelCoords[2] = &Point{1240,0}
+  lvl.LevelCoords[3] = &Point{640,320}
+ 
   lvl.PlayerXY = &Point{400,0}
 
   lvl.Enemies[0] = &Enemy{}
