@@ -34,6 +34,7 @@ type SpriteSheet struct {
   CowSpriteHeight int
   CowYPos int // center bottom of cow's sprite height
   CowStand [8][10]*ebiten.Image
+  CowWalk [8][8]*ebiten.Image
 
   // player sheets
   RunnerImage *ebiten.Image
@@ -135,6 +136,18 @@ func (ss *SpriteSheet) loadCowSheet() {
       // log.Printf("cow image bounds[%v] width[%v] height[%v]", ss.CowStand[y][x].Bounds(), ss.CowSpriteWidth, ss.CowSpriteHeight)
     }
   }
+
+  // cow walk
+  sheet := loadSpriteSheet("resources/cow-walk.png")
+
+  // load sheet into array
+  for y:=0; y < len(ss.CowWalk); y++ {
+    for x:=0; x < len(ss.CowWalk[y]); x++ {
+      rect := image.Rect(x * ss.CowSpriteWidth,y * ss.CowSpriteHeight,(x + 1) * ss.CowSpriteWidth,(y + 1) * ss.CowSpriteHeight)
+      ss.CowWalk[y][x] = sheet.SubImage(rect).(*ebiten.Image)  
+    }
+  }
+
 }
 
 func loadSpriteSheet(path string) *ebiten.Image {

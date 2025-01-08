@@ -21,6 +21,7 @@ type GameLevel struct {
   // TODO probably can be moved to character struct?
   // so that each npc can also contain position on level
   PlayerXY *Point
+  PlayerRadius float64
   
   SpriteWidth int
   SpriteHeight int
@@ -57,6 +58,9 @@ func CreateGameLevel(spriteSheet *SpriteSheet) (*GameLevel) {
 
   lvl.Enemies[0] = &Enemy{}
   lvl.Enemies[0].Pos = &Point{400,0}
+  lvl.Enemies[0].Radius = 50.0
+
+  lvl.PlayerRadius = 50.0
 
   return lvl
 }

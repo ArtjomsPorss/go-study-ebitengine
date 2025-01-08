@@ -61,6 +61,7 @@ type Enemy struct {
   // TODO can be used also for player?
   Direction int
   Angle int
+  Radius float64
 
   RunImage *ebiten.Image
   StandImage [][]*ebiten.Image
@@ -81,6 +82,7 @@ func (g *Game) Update() error {
  
   updateCharacterState()
   updateCharacterPosition(gameLevel)
+  updateCowState()
   return nil
 }
 
@@ -136,6 +138,7 @@ func calculateZone(fx, fy, tx, ty, zoneCount int) int {
   angle = math.Atan2(dy, dx) * (180 / math.Pi)
   // to make South area as value 0 - currently 0 is east-north
   modAngle := angle + 75
+  // modAngle := angle 
   // normalize angle to 0-360
   if modAngle < 0 {
     modAngle += 360 
@@ -345,25 +348,48 @@ func selectCowImageToDraw(g *Game) int {
 
 	log.Printf("cow xy[%v,%v] pl xy[%v,%v] zone[%v]", ex,ey, px, py, zone)
   // get the area group
-  // set the proper image for rendering
- 
-  /*
-	// Calculate deltas
-	dx := float64(gameLevel.PlayerXY.X - gameLevel.Enemies[0].Pos.X)
-	dy := float64(gameLevel.Enemies[0].Pos.Y - gameLevel.PlayerXY.Y) // Invert Y-axis to make upward positive
-
-	// Get the angle in degrees
-	angle := math.Atan2(dy, dx) * (180 / math.Pi)
-	if angle < 0 {
-		angle += 360 // Normalize angle to 0-360
-	}
-
-	// Divide the circle into 8 regions (45 degrees each)
-	region := int(math.Floor((angle + 22.5) / 45)) % 8
-	log.Printf("cow xy[%v,%v] pl xy[%v,%v] region[%v] zone[%v]", ex,ey, px, py, region, zone)
-	*/
-	// return directions[region]
+  // TODO set the proper image for rendering
 	return zone
+}
+
+func updateCowState() {
+  // cow radius is larger than player's
+  // is cow point + movement distance distance to player point is less than cow radius + player radius
+  // then move cow towards player
+  cPos := gameLevel.Enemies[0].Pos
+  pPos := gameLevel.PlayerXY
+  // calculate distance between 2 positions
+  dx := cPos.X - pPos.X
+  dy := cPos.Y - pPos.Y
+  d := math.Sqrt(dx * dx + dy * dy)
+  cowMovementDistance := 2.0
+  if d + cowMovementDistance > gameLevel.Enemies[0].Radius + gameLevel.PlayerRadius {
+    // set cow as moving
+    gameLevel.Enemies[0].State = 1
+    // move towards player
+
+    // calculate angle from cow to player
+    dx = pPos.X - cPos.X
+    dy = cPos.Y - pPos.Y
+ 
+    modAngle := math.Atan2(dy, dx) * (180 / math.Pi)
+    if modAngle < 0 {
+      modAngle += 360 
+    } else if modAngle > 360 {
+      modAngle -= 360
+    }
+    modAngle = 360 - modAngle
+
+    angleRadians := modAngle * math.Pi / 180
+    deltaX := math.Cos(angleRadians) * cowMovementDistance
+    deltaY := math.Sin(angleRadians) * cowMovementDistance
+    // new position
+    p := Point{cPos.X + deltaX, cPos.Y + deltaY}
+    gameLevel.Enemies[0].Pos = &p
+  } else {
+    // cow is attacking
+    gameLevel.Enemies[0].State = 2
+  }
 }
 
 func updateCharacterState() {
