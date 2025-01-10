@@ -313,9 +313,9 @@ func drawWall(screen *ebiten.Image) {
 func drawCows(g *Game, screen *ebiten.Image) {
   zone := selectCowImageToDraw(g)
 
-  log.Printf("zone[%v]", zone)
+  // log.Printf("zone[%v]", zone)
 
-  divider := len(floorSheet.CowStand[zone])
+  divider := len(floorSheet.CowToRender[zone])
   // divide by 5 makes it slow enough
   i := g.count / 5 % divider
 
@@ -325,12 +325,12 @@ func drawCows(g *Game, screen *ebiten.Image) {
   // adjust for where player is rendered on center of screen
   op.GeoM.Translate(screenWidth/2, screenHeight/2)
   // adjust for where cow's standing center mass at bottom of legs are on a sprite
-  xy := floorSheet.CowStand[0][i].Bounds().Size()
+  xy := floorSheet.CowToRender[0][i].Bounds().Size()
   op.GeoM.Translate(-float64(xy.X/2), -float64(floorSheet.CowYPos))
   // adjust for player feet position (39p lower)
   op.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
 
-  screen.DrawImage(floorSheet.CowStand[zone][i], op)
+  screen.DrawImage(floorSheet.CowToRender[zone][i], op)
 }
 
 func selectCowImageToDraw(g *Game) int {
@@ -366,6 +366,7 @@ func updateCowState() {
   if d + cowMovementDistance > gameLevel.Enemies[0].Radius + gameLevel.PlayerRadius {
     // set cow as moving
     gameLevel.Enemies[0].State = 1
+    floorSheet.CowToRender = floorSheet.CowWalk
     // move towards player
 
     // calculate angle from cow to player
@@ -389,6 +390,7 @@ func updateCowState() {
   } else {
     // cow is attacking
     gameLevel.Enemies[0].State = 2
+    floorSheet.CowToRender = floorSheet.CowStand
   }
 }
 

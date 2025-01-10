@@ -33,8 +33,12 @@ type SpriteSheet struct {
   CowSpriteWidth int
   CowSpriteHeight int
   CowYPos int // center bottom of cow's sprite height
-  CowStand [8][10]*ebiten.Image
-  CowWalk [8][8]*ebiten.Image
+  CowStand [][]*ebiten.Image
+
+  CowWalkSpriteWidth int
+  CowWalkSpriteHeight int
+  CowWalk [][]*ebiten.Image
+  CowToRender [][]*ebiten.Image
 
   // player sheets
   RunnerImage *ebiten.Image
@@ -128,6 +132,16 @@ func (ss *SpriteSheet) loadCowSheet() {
   sheet := loadSpriteSheet("resources/cow-stand.png")
   // log.Printf("cowsheet bounds [%v]", sheet.Bounds())
 
+	// Define dimensions for the 2D slice
+	width := 8
+	height := 10
+
+	// Create a 2D slice of *ebiten.Image
+	ss.CowStand = make([][]*ebiten.Image, height) // Height rows
+	for i := range ss.CowStand {
+		ss.CowStand[i] = make([]*ebiten.Image, width) // Width columns
+	}
+
   // load sheet into array
   for y:=0; y < len(ss.CowStand); y++ {
     for x:=0; x < len(ss.CowStand[y]); x++ {
@@ -138,12 +152,24 @@ func (ss *SpriteSheet) loadCowSheet() {
   }
 
   // cow walk
-  sheet := loadSpriteSheet("resources/cow-walk.png")
+  sheet = loadSpriteSheet("resources/cow-walk.png")
+  ss.CowWalkSpriteWidth = 157
+  ss.CowWalkSpriteHeight = 151
+
+	// Define dimensions for the 2D slice
+	width = 8
+	height = 8 
+
+	// Create a 2D slice of *ebiten.Image
+	ss.CowWalk = make([][]*ebiten.Image, height) // Height rows
+	for i := range ss.CowWalk {
+		ss.CowWalk[i] = make([]*ebiten.Image, width) // Width columns
+	}
 
   // load sheet into array
   for y:=0; y < len(ss.CowWalk); y++ {
     for x:=0; x < len(ss.CowWalk[y]); x++ {
-      rect := image.Rect(x * ss.CowSpriteWidth,y * ss.CowSpriteHeight,(x + 1) * ss.CowSpriteWidth,(y + 1) * ss.CowSpriteHeight)
+      rect := image.Rect(x * ss.CowWalkSpriteWidth,y * ss.CowWalkSpriteHeight,(x + 1) * ss.CowWalkSpriteWidth,(y + 1) * ss.CowWalkSpriteHeight)
       ss.CowWalk[y][x] = sheet.SubImage(rect).(*ebiten.Image)  
     }
   }
