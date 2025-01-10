@@ -26,12 +26,15 @@
 - battle
   - [x] draw an enemy
   - [x] make XY position center bottom of character
-    - [ ] adjust other sprites for player's position
-  - [ ] enemy tracks player
-  - [ ] enemy moves towards character
+    - [x] adjust other sprites for player's position
+  - [x] enemy tracks player
+  - [x] enemy moves towards character
   - [ ] draw several enemies
   - [ ] update closest enemy first
     - [ ] (later) enemy shouldn't move out of bounds
   - [ ] when enemy is close - attack
   - [ ] attacking animation
-  - [ ] draw life
+  - [ ] draw life bars
+  - [ ] enemy attack counts at certain distance
+  - [ ] enemy is damaged by player attack
+
