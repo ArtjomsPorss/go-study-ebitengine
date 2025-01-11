@@ -390,7 +390,7 @@ func updateCowState() {
   } else {
     // cow is attacking
     gameLevel.Enemies[0].State = 2
-    floorSheet.CowToRender = floorSheet.CowStand
+    floorSheet.CowToRender = floorSheet.CowAttack
   }
 }
 

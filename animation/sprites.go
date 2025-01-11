@@ -37,7 +37,10 @@ type SpriteSheet struct {
 
   CowWalkSpriteWidth int
   CowWalkSpriteHeight int
+  CowAttackWidth int
+  CowAttackHeight int
   CowWalk [][]*ebiten.Image
+  CowAttack [][]*ebiten.Image
   CowToRender [][]*ebiten.Image
 
   // player sheets
@@ -174,6 +177,28 @@ func (ss *SpriteSheet) loadCowSheet() {
     }
   }
 
+  // cow walk
+  sheet = loadSpriteSheet("resources/cow-attack.png")
+  ss.CowAttackHeight = 218
+  ss.CowAttackWidth = 262
+
+	// Define dimensions for the 2D slice
+	width = 19
+	height = 8 
+
+	// Create a 2D slice of *ebiten.Image
+	ss.CowAttack = make([][]*ebiten.Image, height) // Height rows
+	for i := range ss.CowAttack {
+		ss.CowAttack[i] = make([]*ebiten.Image, width) // Width columns
+	}
+
+  // load sheet into array
+  for y:=0; y < len(ss.CowAttack); y++ {
+    for x:=0; x < len(ss.CowAttack[y]); x++ {
+      rect := image.Rect(x * ss.CowAttackWidth,y * ss.CowAttackHeight,(x + 1) * ss.CowAttackWidth,(y + 1) * ss.CowAttackHeight)
+      ss.CowAttack[y][x] = sheet.SubImage(rect).(*ebiten.Image)
+    }
+  }
 }
 
 func loadSpriteSheet(path string) *ebiten.Image {
