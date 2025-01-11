@@ -314,8 +314,9 @@ func drawCows(g *Game, screen *ebiten.Image) {
   zone := selectCowImageToDraw(g)
 
   // log.Printf("zone[%v]", zone)
+  cowToRender := floorSheet.CowToRender
 
-  divider := len(floorSheet.CowToRender[zone])
+  divider := len(cowToRender.Images()[zone])
   // divide by 5 makes it slow enough
   i := g.count / 5 % divider
 
@@ -325,12 +326,12 @@ func drawCows(g *Game, screen *ebiten.Image) {
   // adjust for where player is rendered on center of screen
   op.GeoM.Translate(screenWidth/2, screenHeight/2)
   // adjust for where cow's standing center mass at bottom of legs are on a sprite
-  xy := floorSheet.CowToRender[0][i].Bounds().Size()
-  op.GeoM.Translate(-float64(xy.X/2), -float64(floorSheet.CowYPos))
+  xy := cowToRender.Images()[0][i].Bounds().Size()
+  op.GeoM.Translate(-float64(xy.X/2), -float64(cowToRender.TopToFeet()))
   // adjust for player feet position (39p lower)
   op.GeoM.Translate(float64(0), float64(floorSheet.PlayerYPos))
 
-  screen.DrawImage(floorSheet.CowToRender[zone][i], op)
+  screen.DrawImage(floorSheet.CowToRender.Images()[zone][i], op)
 }
 
 func selectCowImageToDraw(g *Game) int {

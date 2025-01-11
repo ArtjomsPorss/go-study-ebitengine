@@ -9,6 +9,33 @@ import (
   "github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+type ImageContainerInterface interface {
+  Images() [][]*ebiten.Image
+  Width() int
+  Height() int
+  TopToFeet() int
+}
+
+type ImageContainer struct {
+  sprites [][]*ebiten.Image
+  height int
+  width int
+  topToFeet int
+}
+
+func (i ImageContainer) Images() [][]*ebiten.Image {
+  return i.sprites
+}
+func (i ImageContainer) Height() int {
+  return i.height
+}
+func (i ImageContainer) Width() int {
+  return i.width
+}
+func (i ImageContainer) TopToFeet() int {
+  return i.topToFeet
+}
+
 // spritesheet represents a collection of sprite images.
 type SpriteSheet struct {
   // floor 
@@ -33,15 +60,16 @@ type SpriteSheet struct {
   CowSpriteWidth int
   CowSpriteHeight int
   CowYPos int // center bottom of cow's sprite height
-  CowStand [][]*ebiten.Image
 
   CowWalkSpriteWidth int
   CowWalkSpriteHeight int
   CowAttackWidth int
   CowAttackHeight int
-  CowWalk [][]*ebiten.Image
-  CowAttack [][]*ebiten.Image
-  CowToRender [][]*ebiten.Image
+
+  CowWalk ImageContainer
+  CowAttack ImageContainer
+  CowStand ImageContainer
+  CowToRender ImageContainer
 
   // player sheets
   RunnerImage *ebiten.Image
@@ -127,11 +155,11 @@ func (spriteSheet *SpriteSheet) loadLeftRightCliff() {
 }
 
 func (ss *SpriteSheet) loadCowSheet() {
-  ss.CowYPos = 150 // to adjust position to cow's feet where it stands
-  ss.CowSpriteWidth = 164
-  ss.CowSpriteHeight = 156
+  cowStandTopToFeet := 150 // to adjust position to cow's feet where it stands
+  cowStandWidth := 164
+  cowStandHeight := 156
 
-  // cow stand
+  // COW STAND
   sheet := loadSpriteSheet("resources/cow-stand.png")
   // log.Printf("cowsheet bounds [%v]", sheet.Bounds())
 
@@ -140,64 +168,84 @@ func (ss *SpriteSheet) loadCowSheet() {
 	height := 10
 
 	// Create a 2D slice of *ebiten.Image
-	ss.CowStand = make([][]*ebiten.Image, height) // Height rows
-	for i := range ss.CowStand {
-		ss.CowStand[i] = make([]*ebiten.Image, width) // Width columns
+	cowStand := make([][]*ebiten.Image, height) // Height rows
+	for i := range cowStand {
+		cowStand[i] = make([]*ebiten.Image, width) // Width columns
 	}
 
   // load sheet into array
-  for y:=0; y < len(ss.CowStand); y++ {
-    for x:=0; x < len(ss.CowStand[y]); x++ {
-      rect := image.Rect(x * ss.CowSpriteWidth,y * ss.CowSpriteHeight,(x + 1) * ss.CowSpriteWidth,(y + 1) * ss.CowSpriteHeight)
-      ss.CowStand[y][x] = sheet.SubImage(rect).(*ebiten.Image)  
-      // log.Printf("cow image bounds[%v] width[%v] height[%v]", ss.CowStand[y][x].Bounds(), ss.CowSpriteWidth, ss.CowSpriteHeight)
+  for y:=0; y < len(cowStand); y++ {
+    for x:=0; x < len(cowStand[y]); x++ {
+      rect := image.Rect(x * cowStandWidth,y * cowStandHeight,(x + 1) * cowStandWidth,(y + 1) * cowStandHeight)
+      cowStand[y][x] = sheet.SubImage(rect).(*ebiten.Image)  
     }
   }
 
-  // cow walk
+  ss.CowStand = ImageContainer {
+    sprites: cowStand,
+    height: cowStandHeight,
+    width: cowStandWidth,
+    topToFeet: cowStandTopToFeet,
+  }
+
+  // COW WALK
   sheet = loadSpriteSheet("resources/cow-walk.png")
-  ss.CowWalkSpriteWidth = 157
-  ss.CowWalkSpriteHeight = 151
+  cowWalkWidth := 157
+  cowWalkHeight := 151
+  cowWalkTopToFeet := 140
 
 	// Define dimensions for the 2D slice
 	width = 8
 	height = 8 
 
 	// Create a 2D slice of *ebiten.Image
-	ss.CowWalk = make([][]*ebiten.Image, height) // Height rows
-	for i := range ss.CowWalk {
-		ss.CowWalk[i] = make([]*ebiten.Image, width) // Width columns
+	cowWalk := make([][]*ebiten.Image, height) // Height rows
+	for i := range cowWalk {
+		cowWalk[i] = make([]*ebiten.Image, width) // Width columns
 	}
 
   // load sheet into array
-  for y:=0; y < len(ss.CowWalk); y++ {
-    for x:=0; x < len(ss.CowWalk[y]); x++ {
-      rect := image.Rect(x * ss.CowWalkSpriteWidth,y * ss.CowWalkSpriteHeight,(x + 1) * ss.CowWalkSpriteWidth,(y + 1) * ss.CowWalkSpriteHeight)
-      ss.CowWalk[y][x] = sheet.SubImage(rect).(*ebiten.Image)  
+  for y:=0; y < len(cowWalk); y++ {
+    for x:=0; x < len(cowWalk[y]); x++ {
+      rect := image.Rect(x * cowWalkWidth,y * cowWalkHeight,(x + 1) * cowWalkWidth,(y + 1) * cowWalkHeight)
+      cowWalk[y][x] = sheet.SubImage(rect).(*ebiten.Image)  
     }
   }
+  ss.CowWalk = ImageContainer{
+    sprites: cowWalk,
+    height: cowWalkHeight,
+    width: cowWalkWidth,
+    topToFeet: cowWalkTopToFeet,
+  }
 
-  // cow walk
+  // COW ATTACK
   sheet = loadSpriteSheet("resources/cow-attack.png")
-  ss.CowAttackHeight = 218
-  ss.CowAttackWidth = 262
+  cowAttackHeight := 218
+  cowAttackWidth := 262
+  cowAttackTopToFeet := 174
 
 	// Define dimensions for the 2D slice
 	width = 19
 	height = 8 
 
 	// Create a 2D slice of *ebiten.Image
-	ss.CowAttack = make([][]*ebiten.Image, height) // Height rows
-	for i := range ss.CowAttack {
-		ss.CowAttack[i] = make([]*ebiten.Image, width) // Width columns
+	cowAttack := make([][]*ebiten.Image, height) // Height rows
+	for i := range cowAttack {
+		cowAttack[i] = make([]*ebiten.Image, width) // Width columns
 	}
 
   // load sheet into array
-  for y:=0; y < len(ss.CowAttack); y++ {
-    for x:=0; x < len(ss.CowAttack[y]); x++ {
-      rect := image.Rect(x * ss.CowAttackWidth,y * ss.CowAttackHeight,(x + 1) * ss.CowAttackWidth,(y + 1) * ss.CowAttackHeight)
-      ss.CowAttack[y][x] = sheet.SubImage(rect).(*ebiten.Image)
+  for y:=0; y < len(cowAttack); y++ {
+    for x:=0; x < len(cowAttack[y]); x++ {
+      rect := image.Rect(x * cowAttackWidth,y * cowAttackHeight,(x + 1) * cowAttackWidth,(y + 1) * cowAttackHeight)
+      cowAttack[y][x] = sheet.SubImage(rect).(*ebiten.Image)
     }
+  }
+  ss.CowAttack = ImageContainer{
+    sprites: cowAttack,
+    height: cowAttackHeight,
+    width: cowAttackWidth,
+    topToFeet: cowAttackTopToFeet,
   }
 }
 
